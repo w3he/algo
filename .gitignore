@@ -1,0 +1,15 @@
+.DS_Store
+.idea/
+.vs
+*.csv
+**/*.pyproj
+*.sln
+*.egg-info
+**/*.pyc
+**/*.cp
+**/*.log
+dist/
+build/
+logs/
+mock/
+testfiles/
