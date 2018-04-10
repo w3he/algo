@@ -3,10 +3,7 @@ import players
 import argparse
 import time
 
-
-ROWS = 6
-COLS = 7
-EMPTY = ' '
+from players import *
 
 
 def parse_args():
@@ -37,10 +34,10 @@ def init():
 
 def select_player(name, color):
         return {
-            'Novice': players.NovicePlayer(color),
-            'Defensive': players.DefensivePlayer(color),
-            'Naive': players.NaivePlayer(color)
-        }.get(name, players.ManualPlayer(color, name))
+            'Novice': NovicePlayer(color),
+            'Defensive': DefensivePlayer(color),
+            'Naive': NaivePlayer(color)
+        }.get(name, ManualPlayer(color, name))
 
 
 def main():
