@@ -1,4 +1,5 @@
 import random
+import copy
 
 ROWS = 6
 COLS = 7
@@ -61,8 +62,7 @@ class Player:
                 board[row][col] = self.color
                 return self.check(board, self.color)
 
-        # No more legal moves
-        raise Exception("It's a DRAW")
+        raise Exception("No more legal moves. It's a DRAW!")
 
     def add_results(self, result):
         l = len(result)
@@ -79,10 +79,8 @@ class Player:
                     connected.append((row, col))
                     if len(connected) == 4:
                         return connected
-                elif board[row][col] != EMPTY and connected:
+                elif connected:  # horizontally, empty means interrupt
                     connected = []  # reset
-                elif board[row][col] == EMPTY:
-                    break
             if connected and color == self.color:
                 self.add_results(connected)
 
@@ -96,40 +94,39 @@ class Player:
                         return connected
                 elif board[row][col] != EMPTY and connected:
                     connected = []  # reset
-                elif board[row][col] == EMPTY:
+                elif board[row][col] == EMPTY:  # vertically, empty means top
                     break
             if connected and color == self.color:
                 self.add_results(connected)
 
         # check diagonal - UP
-        # row, col both increments
-        for c in range(1 + COLS // 2):
+        # start from one off from lower left corner
+        # we need one-off to for diagonal line starting (1,0) position
+        for c in range(-1, 1 + COLS // 2):
             col = c - 1
             connected = []
+            # row, col both increments
             for row in range(ROWS):
                 col += 1
-                if col >= COLS:
+                if col < 0 or col >= COLS:
                     continue
                 if board[row][col] == color:
                     connected.append((row, col))
                     if len(connected) == 4:
                         return connected
-                elif board[row][col] != EMPTY and connected:
+                elif connected:
                     connected = []  # reset
-                elif board[row][col] == EMPTY:
-                    break
             if connected and color == self.color:
                 self.add_results(connected)
 
         # check diagonal - DOWN
-        # row decrements while col increments
-        for c in range(1 + COLS // 2):
+        # start from middle lower, ends one-off to include (1,6) position
+        for c in range(COLS // 2, COLS + 1):
             connected = []
-            col = c - 1
-            row = ROWS
-            for r in range(ROWS):
-                row -= 1
-                col += 1
+            col = c + 1
+            # row increments, while col decrements
+            for row in range(ROWS):
+                col -= 1
                 if row < 0 or col >= COLS:
                     continue
 
@@ -137,11 +134,76 @@ class Player:
                     connected.append((row, col))
                     if len(connected) == 4:
                         return connected
-                elif board[row][col] != EMPTY and connected:
+                elif connected:
                     connected = []  # reset
-                elif board[row][col] == EMPTY:
-                    break
             if connected and color == self.color:
                 self.add_results(connected)
 
         return None
+
+
+class NovicePlayer(Player):
+
+    def __init__(self, color):
+        super().__init__(color)
+
+    def compute(self, board):
+        moves = self.get_moves(board)
+        if not moves:
+            raise Exception("No more legal moves to play.")
+        idx = random.randint(0, len(moves)-1)
+        return moves[idx]
+
+
+class NaivePlayer(Player):
+
+    def __init__(self, color):
+        super().__init__(color)
+
+    def compute(self, board):
+        for col in (3, 2, 4, 1, 5, 0, 6):
+            for row in range(ROWS):
+                if board[row][col] == EMPTY:
+                    return col
+        raise Exception("No more legal moves to play.")
+
+
+class DefensivePlayer(Player):
+
+    _board = None
+
+    def get_last_move(self, board):
+        if self._board:
+            for r in range(ROWS, 0, -1):
+                row = r - 1
+                for col in range(0, COLS):
+                    if self._board[row][col] != board[row][col]:
+                        return row, col
+        else:
+            return 0, 3
+
+    def check(self, board, color):
+        if color == self.color:  # remember the board as I played
+            self._board = copy.deepcopy(board)
+        return super().check(board, color)
+
+    def compute(self, board):
+        (row_payed, col_played) = self.get_last_move(board)
+
+        moves = self.get_moves(board)
+        for col in moves:
+            if col == col_played:
+                # play like a copycat
+                return col_played
+
+        for col in moves:
+            if row_payed > 0:
+                if board[row_payed][col] == EMPTY and board[row_payed-1][col] != EMPTY:
+                    return col
+            elif board[row_payed][col] == EMPTY:
+                return col
+
+        # find another column to play
+        r = random.randint(0, len(moves)-1)
+        return moves[r]
+

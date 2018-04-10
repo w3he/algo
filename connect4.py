@@ -1,5 +1,5 @@
 import sys
-from connect4_player import Player
+from connect4_player import Player, NovicePlayer, DefensivePlayer
 
 
 ROWS = 6
@@ -36,12 +36,12 @@ def manual_play(board, color, col):
 def main():
     board = init()
     done = []
-    computer = Player('B')
+    computer = DefensivePlayer('B')
     while not done:
         done = computer.play(board)
         print_board(board)
         if done:
-            print("Sorry, you lost.")
+            print("Sorry, you lost.", done)
             break
 
         # allow three attempts
@@ -54,7 +54,7 @@ def main():
                     if played:
                         done = computer.check(board, 'R')
                         if done:
-                            print("Congrats! You win.")
+                            print("Congrats! You win.", done)
                             break
                     else:
                         print("Invalid move. Please try again...")
