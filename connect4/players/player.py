@@ -19,6 +19,10 @@ class Player:
         return self._color
 
     @property
+    def name(self):
+        return self.__class__.__name__
+
+    @property
     def results(self):
         return self._results
 
@@ -101,8 +105,8 @@ class Player:
 
         # check diagonal - UP
         # start from one off from lower left corner
-        # we need one-off to for diagonal line starting (1,0) position
-        for c in range(-1, 1 + COLS // 2):
+        # we need two-off to for up diagonal line starting (2,0) position
+        for c in range(-2, 4):
             col = c - 1
             connected = []
             # row, col both increments
@@ -120,8 +124,8 @@ class Player:
                 self.add_results(connected)
 
         # check diagonal - DOWN
-        # start from middle lower, ends one-off to include (1,6) position
-        for c in range(COLS // 2, COLS + 1):
+        # start from middle lower, ends two-off to include down line ends in (2,6) position
+        for c in range(3, COLS + 2):
             connected = []
             col = c + 1
             # row increments, while col decrements
@@ -140,6 +144,12 @@ class Player:
                 self.add_results(connected)
 
         return None
+
+    def print_board(self, board):
+        for r in range(ROWS):
+            row = ROWS - r - 1
+            print(row, board[row])
+        print("")
 
 
 class NovicePlayer(Player):
@@ -206,4 +216,48 @@ class DefensivePlayer(Player):
         # find another column to play
         r = random.randint(0, len(moves)-1)
         return moves[r]
+
+
+class ManualPlayer(Player):
+
+    def __init__(self, color, name="You"):
+        super().__init__(color)
+        self._name = name
+
+    @property
+    def name(self):
+        return self._name
+
+    def play(self, board):
+        for t in range(3):
+            try:
+                inp = input("Your move [col]:")
+                col = int(inp)
+                if 0 <= col < COLS:
+                    played = self.manual_play(board, col)
+                    if played:
+                        done = self.check(board, self.color)
+                        if done:
+                            print("Congrats! You win.", done)
+                            return done
+                        break  # no need to retry
+                    else:
+                        print("Invalid move. Please try again...")
+                else:
+                    print("Invalid move. Please try again...")
+            except ValueError:
+                print("Please enter a number.")
+
+        return None
+
+    def manual_play(self, board, col):
+
+        if col is not None:
+            for r in range(ROWS):
+                if board[r][col] == EMPTY:
+                    board[r][col] = self.color
+                    return True  # played
+        # no legal move
+        return False
+
 
