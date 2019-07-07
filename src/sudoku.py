@@ -1,10 +1,11 @@
+from __future__ import print_function
 import sys
 import time
 
 N = 9
 
 
-def get_nset():
+def get_n_set():
     nums = set()
     for n in range(1, N+1):
         nums.add(n)
@@ -30,7 +31,7 @@ def get_empty(sudoku):
 
 
 def get_missing(row):
-    vals = get_nset()
+    vals = get_n_set()
     for n in row:
         if n:
             vals.remove(n)
@@ -68,7 +69,7 @@ depth = []
 
 
 def solve(sudoku):
-    depth.append(len(depth) +1)
+    depth.append(len(depth) + 1)
 
     print("")
     print(depth)

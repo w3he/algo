@@ -12,7 +12,10 @@ class DefensivePlayer(Player):
 
         (row_played, col_played, _) = self.all_moves[-1]
 
-        if 2 < row_played < ROWS-1:
+        if len(self.all_moves) < 5:
+            return col_played  # follow suit
+
+        if row_played < ROWS-1:
             return col_played  # follow suit
 
         moves = self.get_moves(board)

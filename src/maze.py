@@ -1,55 +1,46 @@
+from __future__ import print_function
 import sys
 
+N = 6
 maze = [
-    [1, 1, 1, 1, 1, 0, 1],
-    [0, 0, 0, 0, 1, 0, 1],
-    [1, 1, 1, 0, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 0, 0],
-    [1, 0, 1, 1, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 0, 1, 1],
+    [0, 1, 0, 0, 1, 0],
+    [1, 1, 1, 0, 1, 0],
+    [1, 0, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0],
+    [1, 1, 1, 1, 1, 1]
 ]
 
-ROWS = len(maze)
-COLS = len(maze[0])
 
+def solve(moves, visited, path):
 
-def check_next(r, c, visited):
-    return 0 <= c < COLS and 0 <= r < ROWS and maze[r][c] and (r, c) not in visited
-
-
-def solve(moves, path, visited):
     for (r, c) in moves:
-
-        if c == COLS - 1 and r == ROWS - 1:  # reaching exit
-            path.append((r, c))
-            return True
-
         visited.append((r, c))
 
         next_moves = []
-        if check_next(r, c + 1, visited):  # right
-            next_moves.append((r, c + 1))
-        if check_next(r + 1, c, visited):  # down
-            next_moves.append((r + 1, c))
-        if check_next(r, c - 1, visited):  # left
-            next_moves.append((r, c - 1))
-        if check_next(r - 1, c, visited):  # up
-            next_moves.append((r - 1, c))
-
+        if c < N-1 and (r, c+1) and maze[r][c+1]:
+            next_moves.append((r, c+1))
+        if r < N-1 and (r+1, c) not in visited and maze[r+1][c]:
+            next_moves.append((r+1, c))
+        if c > 0 and (r, c-1) not in visited and maze[r][c-1]:
+            next_moves.append((r, c-1))
+        if r > 0 and (r-1, c) not in visited and maze[r-1][c]:
+            next_moves.append((r-1, c))
         if next_moves:
             path.append((r, c))
-            result = solve(next_moves, path, visited)
+            result = solve(next_moves, visited, path)
             if result:
                 return True
-    # back tracking
+        elif c == N-1 and r == N-1:
+            path.append((r, c))
+            return True
     path.pop()
     return False
 
 
 def print_path(path, visited):
-    for r in range(ROWS):
-        for c in range(COLS):
+    for r in range(N):
+        for c in range(N):
             if not maze[r][c]:
                 print(" o", end='')
             elif (r, c) in path:
@@ -57,7 +48,7 @@ def print_path(path, visited):
             elif (r, c) in visited:
                 print(" *", end='')
             else:
-                print("  ", end='')
+                print(" 1", end='')
         print('')
 
 
@@ -65,10 +56,9 @@ def main():
     visited = []
     path = []
     moves = [(0, 0)]
-    solve(moves, path, visited)
+    solve(moves, visited, path)
 
     print_path(path, visited)
-
 
 if __name__ == "__main__":
     sys.exit(int(main() or 0))

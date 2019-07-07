@@ -38,6 +38,7 @@ class Player:
     def reset_results(self):
         self.results = ([], [], [])
 
+    # get available moves as list of column indices
     def get_moves(self, board):
         moves = []
         for col in range(COLS):
@@ -45,6 +46,7 @@ class Player:
                 moves.append(col)
         return moves
 
+    # select a legit move as column index
     def compute(self, board):
         moves = self.get_moves(board)
         if not moves:
@@ -61,6 +63,7 @@ class Player:
 
         return moves[idx]
 
+    # make a legit move by adding a colored piece to the selected column
     def play(self, board):
         # reset previous results
         self.reset_results()
@@ -80,78 +83,8 @@ class Player:
         self.results[l-1].append(result)
 
     def check(self, board, color):
-        # do we have 4 in a row
-        for row in range(ROWS):
-            connected = []
-            for col in range(COLS):
-                if board[row][col] == color:
-                    connected.append((row, col))
-                    if len(connected) == 4:
-                        return connected
-                elif connected:  # horizontally, empty means interrupt
-                    connected = []  # reset
-            if connected and color == self.color:
-                self.add_results(connected)
+        return self.check_row(board, color) or self.check_column(board, color) or self.check_diag_up(board, color) or self.check_diag_down(board, color)
 
-        # do we have 4 in a column
-        for col in range(COLS):
-            connected = []
-            for row in range(ROWS):
-                if board[row][col] == color:
-                    connected.append((row, col))
-                    if len(connected) == 4:
-                        return connected
-                elif board[row][col] != EMPTY and connected:
-                    connected = []  # reset
-                elif board[row][col] == EMPTY:  # vertically, empty means top
-                    break
-            if connected and color == self.color:
-                self.add_results(connected)
-
-        # check diagonal - UP
-        # start from one off from lower left corner
-        # we need two-off to for up diagonal line starting (2,0) position
-        for c in range(-2, 4):
-            col = c
-            connected = []
-            # row, col both increments
-            for row in range(ROWS):
-                if 0 <= col < COLS and board[row][col] == color:
-                    connected.append((row, col))
-                    if len(connected) == 4:
-                        return connected
-                elif connected:
-                    connected = []  # reset
-                col += 1
-
-            if connected and color == self.color:
-                self.add_results(connected)
-
-        # check diagonal - DOWN
-        # start from middle lower, ends two-off to include down line ends in (2,6) position
-        for c in range(3, COLS + 2):
-            connected = []
-            col = c
-            # row increments, while col decrements
-            for row in range(ROWS):
-                if 0 <= col < COLS and board[row][col] == color:
-                    connected.append((row, col))
-                    if len(connected) == 4:
-                        return connected
-                elif connected:
-                    connected = []  # reset
-                col -= 1
-
-            if connected and color == self.color:
-                self.add_results(connected)
-
-        return None
-
-    def print_board(self, board):
-        for r in range(ROWS):
-            row = ROWS - r - 1
-            print(row, board[row])
-        print("")
 
 
 
